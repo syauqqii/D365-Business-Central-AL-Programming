@@ -1,0 +1,44 @@
+# 🧠 AL Language Project
+
+# Hasil build .app
+*.app
+
+# Folder publish/temp/cache dari VS Code
+.vscode/.alpackages/
+.alpackages/
+.alcache/
+.cache/
+
+# User/workspace VS Code settings
+*.code-workspace
+.vscode/settings.json
+.vscode/launch.json
+
+# Artifacts build pipeline (opsional)
+output/
+publish/
+*.zip
+
+# File temporary backup (misal dari Windows)
+*.tmp
+*.bak
+*.log
+
+# Mac system files
+.DS_Store
+
+# Linux / Ubuntu metadata
+.Trash-*
+*~
+
+# Windows Thumbs
+Thumbs.db
+
+# Node/npm if you're mixing JS/TS front-end
+node_modules/
+
+# Test Results
+TestResults/
+
+# Pakai JetBrains Rider/IntelliJ?
+.idea/

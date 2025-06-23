@@ -1,8 +1,8 @@
 controladdin ProgressBarAddIn
 {
-    Scripts = './src/Control_AddIn/ProgressBar/script.js';
-    StartupScript = './src/Control_AddIn/ProgressBar/startup.js';
-    StyleSheets = './src/Control_AddIn/ProgressBar/style.css';
+    Scripts = './src/Control_AddIn/ProgressBar/js/script.js';
+    StartupScript = './src/Control_AddIn/ProgressBar/js/startup.js';
+    StyleSheets = './src/Control_AddIn/ProgressBar/css/style.css';
 
     MinimumHeight = 50;
     MaximumHeight = 50;

@@ -1,0 +1,63 @@
+.tt-container {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #ffffff;
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#controlAddIn > h3 {
+    font-size: 18px;
+    margin: 0 0 12px 0;
+    font-weight: 600;
+    color: #333;
+}
+
+#tt-url {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-bottom: 12px;
+}
+
+#tt-download-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #0078D7;
+    color: #fff;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#tt-download-btn:hover {
+    background-color: #005bb5;
+}
+
+#tt-result {
+    margin-top: 16px;
+    font-size: 13px;
+    color: #333;
+}
+
+#tt-result p {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+#tt-result a {
+    color: #0078D7;
+    text-decoration: none;
+}
+
+#tt-result a:hover {
+    text-decoration: underline;
+}

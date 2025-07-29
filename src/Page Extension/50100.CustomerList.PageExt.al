@@ -32,6 +32,6 @@ pageextension 50100 CustomerListExt extends "Customer List"
     [TryFunction]
     procedure NotifyUser(Notification: Interface "INotification")
     begin
-        Notification.SendNotification('Hello!');
+        // Notification.SendNotification('Hello!');
     end;
 }

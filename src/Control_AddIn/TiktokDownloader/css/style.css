@@ -1,63 +1,420 @@
-.tt-container {
-    font-family: "Segoe UI", Arial, sans-serif;
-    background-color: #ffffff;
-    padding: 16px;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 0 6px rgba(0, 0, 0, 0.05);
-    max-width: 100%;
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
-#controlAddIn > h3 {
-    font-size: 18px;
-    margin: 0 0 12px 0;
-    font-weight: 600;
-    color: #333;
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
 }
 
+/* Animated background particles */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="rgba(255,255,255,0.1)"/><circle cx="80" cy="30" r="1.5" fill="rgba(255,255,255,0.08)"/><circle cx="40" cy="70" r="1" fill="rgba(255,255,255,0.06)"/><circle cx="90" cy="80" r="2.5" fill="rgba(255,255,255,0.12)"/><circle cx="10" cy="60" r="1.8" fill="rgba(255,255,255,0.09)"/></svg>') repeat;
+    animation: float-bg 20s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 0;
+}
+
+@keyframes float-bg {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-10px) rotate(1deg); }
+    66% { transform: translateY(5px) rotate(-1deg); }
+}
+
+/* Main container */
+.tt-container {
+    position: relative;
+    z-index: 1;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 24px;
+    padding: 40px;
+    margin: 20px auto;
+    max-width: 480px;
+    box-shadow: 
+        0 32px 64px rgba(0, 0, 0, 0.12),
+        0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+        0 2px 16px rgba(255, 255, 255, 0.1) inset;
+    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    overflow: hidden;
+}
+
+.tt-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.1), 
+        transparent);
+    animation: shimmer 4s infinite;
+    pointer-events: none;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+}
+
+.tt-container:hover {
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 
+        0 40px 80px rgba(0, 0, 0, 0.16),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+        0 4px 32px rgba(255, 255, 255, 0.15) inset,
+        0 0 60px rgba(102, 126, 234, 0.3);
+}
+
+/* Header styling */
+#controlAddIn > h3 {
+    font-size: 36px;
+    font-weight: 900;
+    text-align: center;
+    margin-bottom: 32px;
+    background: linear-gradient(135deg, #fff 0%, #e0e7ff 50%, #c7d2fe 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.3);
+    position: relative;
+    animation: titlePulse 3s ease-in-out infinite;
+}
+
+@keyframes titlePulse {
+    0%, 100% { 
+        transform: scale(1);
+        filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.3));
+    }
+    50% { 
+        transform: scale(1.05);
+        filter: drop-shadow(0 0 20px rgba(255, 255, 255, 0.6));
+    }
+}
+
+#controlAddIn > h3::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    border-radius: 2px;
+    animation: underlineGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes underlineGlow {
+    0% { box-shadow: 0 0 5px rgba(102, 126, 234, 0.5); }
+    100% { box-shadow: 0 0 20px rgba(102, 126, 234, 0.8), 0 0 30px rgba(118, 75, 162, 0.4); }
+}
+
+/* Input field styling */
 #tt-url {
     width: 100%;
-    padding: 10px 12px;
-    font-size: 14px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
-    margin-bottom: 12px;
+    padding: 18px 24px;
+    font-size: 16px;
+    font-weight: 500;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.08);
+    color: white;
+    font-family: inherit;
+    margin-bottom: 24px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    backdrop-filter: blur(10px);
+    position: relative;
 }
 
-#tt-download-btn {
+#tt-url::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 400;
+}
+
+#tt-url:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 
+        0 0 0 4px rgba(255, 255, 255, 0.1),
+        0 12px 40px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+    transform: translateY(-4px);
+}
+
+#tt-url:hover {
+    border-color: rgba(255, 255, 255, 0.35);
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+/* Button base styling */
+.btn-base {
     display: inline-block;
-    padding: 10px 20px;
-    background-color: #0078D7;
-    color: #fff;
-    font-size: 14px;
+    padding: 16px 32px;
+    font-size: 16px;
+    font-weight: 600;
     border: none;
-    border-radius: 4px;
+    border-radius: 16px;
     cursor: pointer;
-    transition: background-color 0.2s ease-in-out;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    text-decoration: none;
+    user-select: none;
+    transform-origin: center;
+}
+
+.btn-base::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, 
+        transparent, 
+        rgba(255, 255, 255, 0.2), 
+        transparent);
+    transition: left 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-base:hover::before {
+    left: 100%;
+}
+
+.btn-base:active {
+    transform: scale(0.96);
+}
+
+/* Download button */
+#tt-download-btn {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 50%, #ff8a80 100%);
+    color: white;
+    margin-right: 12px;
+    box-shadow: 
+        0 12px 40px rgba(255, 107, 107, 0.35),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    position: relative;
 }
 
 #tt-download-btn:hover {
-    background-color: #005bb5;
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 20px 60px rgba(255, 107, 107, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 0 40px rgba(255, 107, 107, 0.3);
 }
 
+#tt-download-btn::after {
+    content: '⬇';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 14px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+#tt-download-btn:hover::after {
+    transform: translateY(-50%) translateX(2px);
+    opacity: 1;
+}
+
+/* Clear button */
+#tt-clear-btn {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 50%, #868e96 100%);
+    color: white;
+    box-shadow: 
+        0 12px 40px rgba(108, 117, 125, 0.3),
+        0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    position: relative;
+}
+
+#tt-clear-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 
+        0 20px 60px rgba(108, 117, 125, 0.4),
+        0 0 0 1px rgba(255, 255, 255, 0.2) inset,
+        0 0 40px rgba(108, 117, 125, 0.3);
+}
+
+#tt-clear-btn::after {
+    content: '✕';
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 12px;
+    opacity: 0.8;
+    transition: all 0.3s ease;
+}
+
+#tt-clear-btn:hover::after {
+    transform: translateY(-50%) rotate(90deg);
+    opacity: 1;
+}
+
+/* Result area */
 #tt-result {
-    margin-top: 16px;
-    font-size: 13px;
-    color: #333;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 16px;
+    padding: 24px;
+    margin-top: 24px;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    line-height: 1.6;
+    backdrop-filter: blur(10px);
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
 }
 
-#tt-result p {
-    margin: 8px 0;
-    line-height: 1.4;
+#tt-result:empty::before {
+    content: 'Ready to download...';
+    opacity: 0.5;
+    font-style: italic;
+    color: rgba(255, 255, 255, 0.6);
 }
 
-#tt-result a {
-    color: #0078D7;
-    text-decoration: none;
+#tt-result.processing {
+    background: rgba(255, 193, 7, 0.1);
+    border-color: rgba(255, 193, 7, 0.3);
+    color: #ffc107;
+    animation: pulse 1.5s ease-in-out infinite;
 }
 
-#tt-result a:hover {
-    text-decoration: underline;
+#tt-result.success {
+    background: rgba(40, 167, 69, 0.1);
+    border-color: rgba(40, 167, 69, 0.3);
+    color: #28a745;
+    animation: successPulse 0.6s ease-out;
+}
+
+#tt-result.error {
+    background: rgba(220, 53, 69, 0.1);
+    border-color: rgba(220, 53, 69, 0.3);
+    color: #dc3545;
+    animation: errorShake 0.6s ease-out;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+@keyframes successPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes errorShake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    75% { transform: translateX(5px); }
+}
+
+/* Loading spinner */
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #ffc107;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-right: 8px;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .tt-container {
+        margin: 10px;
+        padding: 24px;
+        border-radius: 20px;
+    }
+    
+    #controlAddIn > h3 {
+        font-size: 28px;
+        margin-bottom: 24px;
+    }
+    
+    #tt-url {
+        padding: 16px 20px;
+        font-size: 16px;
+        margin-bottom: 20px;
+    }
+    
+    #tt-download-btn, #tt-clear-btn {
+        padding: 14px 24px;
+        font-size: 15px;
+        margin-bottom: 8px;
+        width: 100%;
+        margin-right: 0 !important;
+    }
+    
+    #tt-clear-btn {
+        margin-top: 8px;
+    }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* Focus indicators for keyboard navigation */
+#tt-url:focus-visible,
+#tt-download-btn:focus-visible,
+#tt-clear-btn:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .tt-container {
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        background: rgba(0, 0, 0, 0.8);
+    }
+    
+    #tt-url {
+        border: 2px solid rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.1);
+    }
 }

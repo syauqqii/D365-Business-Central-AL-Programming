@@ -52,8 +52,10 @@ page 50106 "Tiktok Downloader Page"
                     if JsonResponse.Get('data', JsonToken) and JsonToken.IsObject() then begin
                         JsonData := JsonToken.AsObject();
 
-                        JsonData.Get('filename', JsonToken);
-                        filename := JsonToken.AsValue().AsText();
+                        // if JsonData.Get('filename', JsonToken) then
+                        //     filename := JsonToken.AsValue().AsText();
+
+                        filename := 'default';
 
                         if JsonData.Get('url', JsonToken) and JsonToken.IsObject() then begin
                             JsonUrl := JsonToken.AsObject();

@@ -1,0 +1,261 @@
+javascript:(function(){   
+   function findInIframes(){     
+     let r = findPageInWindow(window); 
+     if (r) return r;     
+     const frames = document.querySelectorAll('iframe');     
+     for (const f of frames) {       
+       try { r = findPageInWindow(f.contentWindow); if (r) return r; }       
+       catch(e){}     
+     }     
+     function searchFramesRecursively(win){       
+       try {         
+         let rr = findPageInWindow(win); 
+         if (rr) return rr;         
+         for (let i=0;i<win.frames.length;i++){           
+           rr = searchFramesRecursively(win.frames[i]);           
+           if (rr) return rr;         
+         }       
+       } catch(e){}       
+       return null;     
+     }     
+     return searchFramesRecursively(window);   
+   }    
+
+   function findPageInWindow(win){     
+     try {       
+       const forms = Array.from(win.document.querySelectorAll('form.ms-nav-root-form[data-page-id]'));       
+       const form = forms.find(f => f.getAttribute('aria-hidden') !== 'true') || forms[0];       
+       if (!form) return null;        
+       const pageId = form.getAttribute('data-page-id');       
+       const pageName = form.getAttribute('controlname') || form.getAttribute('data-page-name') || null;       
+       const pageTypeCode = form.getAttribute('data-page-type');       
+       const typeMap = {"0":"Card","1":"List","2":"Card","3":"RoleCenter","4":"Worksheet","5":"Document","6":"ListPlus","7":"StandardDialog","8":"ConfirmationDialog","9":"NavigatePage","10":"CardPart","11":"ListPart","12":"HeadlinePart","13":"UserControlHost"};       
+       const pageType = (pageTypeCode!=null ? (typeMap[pageTypeCode]||pageTypeCode) : null);               
+       let tableSourceId = null;       
+       let tableName = null;       
+       try {         
+         const tableElement = form.querySelector('table[data-source-table]');         
+         if (tableElement) {           
+           tableSourceId = tableElement.getAttribute('data-source-table');           
+           tableName = tableElement.getAttribute('data-table-name') || tableSourceId;         
+         }                  
+         const metaElements = form.querySelectorAll('[data-table-id], [data-source-id]');         
+         if (!tableSourceId && metaElements.length > 0) {           
+           for (const meta of metaElements) {             
+             tableSourceId = meta.getAttribute('data-table-id') || meta.getAttribute('data-source-id');             
+             if (tableSourceId) break;           
+           }         
+         }       
+       } catch(e) {}        
+       const headers = Array.from(form.querySelectorAll('thead th'))         
+         .map(th => (th.getAttribute('abbr') || th.innerText || '').trim())         
+         .filter(h=>h);        
+       let row = form.querySelector('tr.real-current') || form.querySelector('tr[data-row-index]') || form.querySelector('tbody tr');       
+       let cells = row ? Array.from(row.querySelectorAll('td')).map(td => {         
+         let field = td.getAttribute('data-dyn-field')                  
+                  || td.getAttribute('controlname')                  
+                  || null;          
+         return {             
+             field: field || null,             
+             value: td.innerText.trim(),             
+             hidden: td.classList.contains('ms-nav-hidden') || td.getAttribute('aria-hidden') === "true"         
+         };     
+       }).filter(c => c.field) : [];        
+       return { pageId, pageName, pageType, tableSourceId, tableName, fields: cells };     
+     } catch(e){ return null; }   
+   }    
+
+   function showAlert(data){     
+     const existing = document.getElementById('bc-custom-alert'); 
+     if (existing) existing.remove();     
+     
+     const overlay = document.createElement('div'); 
+     overlay.id='bc-alert-overlay';     
+     overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:9998;';     
+     document.body.appendChild(overlay);      
+
+     const alertDiv = document.createElement('div'); 
+     alertDiv.id='bc-custom-alert';     
+     alertDiv.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:700px;max-height:85%;overflow:hidden;z-index:9999;font-family:"Segoe UI",sans-serif;border:4px solid #333333;background:#ffffff;box-shadow:0 0 30px rgba(0,0,0,0.3);';     
+     
+     const tableHTML = data.fields.length>0 ? `
+       <div style="padding:0 24px 20px 24px;">
+         <div style="margin-bottom:16px;">
+            <br>
+            <input type="text" id="field-filter" placeholder="Filter fields..." 
+                  style="width:100%;padding:12px 16px;border:3px solid #666666;background:#ffffff;font-size:14px;font-weight:500;color:#000000;outline:none;">
+         </div>
+         <div id="fields-container" style="max-height:420px;overflow-y:auto;border:3px solid #666666;background:#ffffff;">
+           ${data.fields.map((f,i)=>`
+             <div class="field-row" data-field="${f.field.toLowerCase()}" data-value="${f.value.toLowerCase()}" 
+                  style="display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:${i%2===0?'#ffffff':'#f5f5f5'};border-bottom:2px solid #e0e0e0;${f.hidden?'opacity:0.6;':''}">
+               <div style="flex:1;min-width:0;">
+                 <span class="field-name" style="font-weight:700;color:${f.hidden?'#666666':'#000000'};font-size:14px;display:block;">${f.field}</span>
+                 <span class="field-type" style="font-size:11px;color:#666666;margin-top:4px;display:block;font-weight:600;text-transform:uppercase;">${f.hidden?'HIDDEN':'VISIBLE'}</span>
+               </div>
+               <div style="flex:1.5;min-width:0;text-align:right;">
+                 <span class="field-value" style="color:${f.hidden?'#666666':f.value?'#000000':'#666666'};font-size:13px;font-family:monospace;word-break:break-all;font-weight:600;${!f.value?'font-style:italic;':''}">
+                   ${f.value||'[EMPTY]'}
+                 </span>
+               </div>
+               <div style="margin-left:16px;">
+                 ${f.hidden?'<div style="background:#666666;color:#ffffff;font-size:10px;padding:4px 8px;font-weight:700;text-transform:uppercase;">H</div>':'<div style="background:#0066cc;color:#ffffff;font-size:10px;padding:4px 8px;font-weight:700;text-transform:uppercase;">V</div>'}
+               </div>
+             </div>
+           `).join('')}
+         </div>
+         <div style="padding:16px 20px;background:#f5f5f5;border-top:3px solid #666666;text-align:center;font-size:12px;color:#666666;font-weight:600;text-transform:uppercase;">
+           <span id="stats-text">${data.fields.length} FIELDS • ${data.fields.filter(f=>f.hidden).length} HIDDEN • ${data.fields.filter(f=>!f.value).length} EMPTY</span>
+         </div>
+       </div>` : '<div style="padding:60px;text-align:center;color:#666666;font-size:16px;font-weight:600;text-transform:uppercase;">NO FIELDS FOUND</div>';
+     
+     const tableInfo = (data.tableSourceId || data.tableName) ? 
+        `<div style="margin:6px 0;font-size:12px;color:#0066cc;font-weight:600;text-transform:uppercase;">SOURCE: ${data.tableName || data.tableSourceId || 'UNKNOWN'}</div>` : '';
+
+     alertDiv.innerHTML = `
+       <div id="bc-drag-header" style="padding:24px;border-bottom:4px solid #333333;display:flex;justify-content:space-between;align-items:center;cursor:move;background:#0066cc;">
+         <div style="color:#ffffff;">
+           <h3 style="margin:0;font-weight:700;font-size:18px;text-transform:uppercase;">BC PAGE INSPECTOR</h3>
+           <p style="margin:8px 0 0 0;font-size:14px;font-weight:600;text-transform:uppercase;">PAGE: ${data.pageId} • ${data.pageName || 'UNKNOWN'} • ${data.pageType || 'UNKNOWN'}</p>
+           ${tableInfo}
+         </div>
+         <div style="display:flex;gap:12px;align-items:center;">
+           <button id="copy-btn" title="Copy to Clipboard" style="padding:12px 16px;color:#ffffff;background:#333333;border:3px solid #333333;cursor:pointer;font-size:12px;font-weight:700;text-transform:uppercase;">
+             COPY
+           </button>
+           <button id="close-btn" title="Close" style="padding:12px 16px;color:#ffffff;background:#333333;border:3px solid #333333;cursor:pointer;font-size:12px;font-weight:700;text-transform:uppercase;">
+             CLOSE
+           </button>
+         </div>
+       </div>
+       ${tableHTML}
+     `;
+     
+     document.body.appendChild(alertDiv);
+     
+     const filterInput = alertDiv.querySelector('#field-filter');
+     const fieldsContainer = alertDiv.querySelector('#fields-container');
+     const statsText = alertDiv.querySelector('#stats-text');
+     
+     if (filterInput) {
+       filterInput.addEventListener('input', function(e) {
+         const query = e.target.value.toLowerCase();
+         const fieldRows = fieldsContainer.querySelectorAll('.field-row');
+         let visibleCount = 0;
+         
+         fieldRows.forEach(row => {
+           const field = row.getAttribute('data-field');
+           const value = row.getAttribute('data-value');
+           const isMatch = field.includes(query) || value.includes(query);
+           
+           if (isMatch) {
+             row.style.display = 'flex';
+             visibleCount++;
+             
+             const fieldName = row.querySelector('.field-name');
+             const fieldValue = row.querySelector('.field-value');
+             
+             if (query) {
+               fieldName.innerHTML = fieldName.textContent.replace(new RegExp(`(${query})`, 'gi'), '<span style="background:#0066cc;color:#ffffff;padding:2px 4px;font-weight:700;">$1</span>');
+               fieldValue.innerHTML = fieldValue.textContent.replace(new RegExp(`(${query})`, 'gi'), '<span style="background:#0066cc;color:#ffffff;padding:2px 4px;font-weight:700;">$1</span>');
+             } else {
+               fieldName.innerHTML = fieldName.textContent;
+               fieldValue.innerHTML = fieldValue.textContent;
+             }
+           } else {
+             row.style.display = 'none';
+           }
+         });
+         
+         if (query) {
+           statsText.textContent = `${visibleCount} MATCHES • ${data.fields.length} TOTAL FIELDS`;
+         } else {
+           statsText.textContent = `${data.fields.length} FIELDS • ${data.fields.filter(f=>f.hidden).length} HIDDEN • ${data.fields.filter(f=>!f.value).length} EMPTY`;
+         }
+       });
+       
+       document.addEventListener('keydown', function(e) {
+         if (e.ctrlKey && e.key === 'f' && document.getElementById('bc-custom-alert')) {
+           e.preventDefault();
+           filterInput.focus();
+         }
+       });
+     }
+     
+     function removeAlert(){
+       alertDiv.remove();
+       overlay.remove();
+       document.removeEventListener('keydown', arguments.callee);
+     }
+     
+     overlay.onclick = removeAlert;
+     alertDiv.querySelector('#close-btn').onclick = removeAlert;
+     alertDiv.querySelector('#copy-btn').onclick = () => {
+       const output = {
+         pageId: data.pageId,
+         pageName: data.pageName,
+         pageType: data.pageType,
+         tableSourceId: data.tableSourceId,
+         tableName: data.tableName
+       };
+       
+       if (data.fields.length>0) {
+         output.fields = data.fields.map(f=>({
+           field: f.field,
+           value: f.value||'<empty>',
+           hidden: f.hidden
+         }));
+       }
+       
+       navigator.clipboard && navigator.clipboard.writeText(JSON.stringify(output, null, 2));
+       
+       const btn = alertDiv.querySelector('#copy-btn');
+       const originalText = btn.textContent;
+       btn.textContent = 'COPIED';
+       btn.style.background = '#333333';
+       btn.style.color = '#ffffff';
+       setTimeout(() => {
+         btn.textContent = originalText;
+         btn.style.background = '#333333';
+       }, 2000);
+     };
+     
+     const header = alertDiv.querySelector('#bc-drag-header');
+     let isDragging=false, offsetX=0, offsetY=0;
+     
+     header.onmousedown = function(e){
+       isDragging = true;
+       offsetX = e.clientX - alertDiv.getBoundingClientRect().left;
+       offsetY = e.clientY - alertDiv.getBoundingClientRect().top;
+       
+       document.onmousemove = function(e){
+         if (isDragging) {
+           alertDiv.style.left = (e.clientX - offsetX) + 'px';
+           alertDiv.style.top  = (e.clientY - offsetY) + 'px';
+           alertDiv.style.transform = 'none';
+         }
+       };
+       
+       document.onmouseup = function(){
+         isDragging = false;
+         document.onmousemove = null;
+         document.onmouseup = null;
+       };
+     };
+     
+     setTimeout(() => {
+       if (filterInput) filterInput.focus();
+     }, 100);
+   }
+   
+   const result = findInIframes();
+   if (result) {
+     showAlert(result);
+   } else {
+     const div = document.createElement('div');
+     div.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#333333;color:#ffffff;padding:20px 28px;border:4px solid #333333;font-family:system-ui;font-size:14px;z-index:9999;font-weight:700;text-transform:uppercase;';
+     div.innerHTML = 'NO ACTIVE PAGE FOUND<br><span style="font-size:12px;font-weight:600;">PLEASE OPEN A BUSINESS CENTRAL PAGE FIRST</span>';
+     document.body.appendChild(div);
+     setTimeout(()=>div.remove(),4000);
+   }
+})();
